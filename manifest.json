@@ -1,0 +1,22 @@
+{
+  "name": "My Links Saver",
+  "version": "0.1.0",
+  "description": "",
+  "permissions": [
+    "storage",
+    "tabs", 
+    "tabGroups",
+    "activeTab", 
+    "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_icon": {
+      "16": "assets/icon.png"
+    },
+    "default_title": "My Links Saver",
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 3
+}
