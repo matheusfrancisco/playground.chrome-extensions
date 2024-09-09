@@ -6,90 +6,46 @@ function extractUri(url) {
   return null;
 }
 
-//const hosts = {"google.com": ["google.com"]};
-//const hostContainer = document.getElementById('hostContainer');
 
-//chrome.tabs.query({}, async (tabs) => {
-//
-//
-//  for (let tab of tabs) {
-//    let uri = tab.url;
-//    if (tab.url.startsWith("chrome-")) {
-//      uri = extractUri(tab.url);
-//    }
-//
-//
-//    try {
-//
-//      let URIObj = new URL(uri);
-//      let host = URIObj.host;
-//      if (!hosts[host]) {
-//        hosts[host] = [];
-//      }
-//      hosts[host].push(uri);
-//    } catch (e) {
-//      console.error(e);
-//    }
-//
-//
-//  }
-//
-//})
-
-
-//for (let host in hosts) {
-//  let hostDiv = document.createElement('div');
-//  hostDiv.classList.add('host');
-//
-//  // Add the host name as a header
-//  let hostHeader = document.createElement('h3');
-//  hostHeader.textContent = `Host: ${host}`;
-//  hostDiv.appendChild(hostHeader);
-//
-//  // Create an unordered list for the URLs under this host
-//  let ul = document.createElement('ul');
-//
-//  hosts[host].forEach((uri) => {
-//    let li = document.createElement('li');
-//    let a = document.createElement('a');
-//    a.href = uri;
-//    a.textContent = uri;
-//    a.target = "_blank"; // Open the link in a new tab
-//    li.appendChild(a);
-//    ul.appendChild(li);
-//  });
-//
-//  hostDiv.appendChild(ul);
-//  hostContainer.appendChild(hostDiv);
-//
-//}
-
-console.log("end file")
+console.log("popup.js loaded");
 
 document.addEventListener('DOMContentLoaded', () => {
   chrome.tabs.query({}, async (tabs) => {
-    let groupedUris = {};
     const hostContainer = document.getElementById('hostContainer');
     const copyButton = document.getElementById('copyButton');
+    let groupedUris = {};
     let allUrlsText = '';
 
     for (let tab of tabs) {
       let uri = tab.url;
       if (tab.url.startsWith("chrome-")) {
-        uri = extractUri(tab.url); 
+        uri = extractUri(tab.url);
       }
 
-      try {
-        let urlObj = new URL(uri);
-        let host = urlObj.host;
-
-        if (!groupedUris[host]) {
-          groupedUris[host] = [];
-        }
-        groupedUris[host].push([uri, tab.title]);
-      } catch (error) {
-        console.error(`Invalid URL: ${uri}`, error);
+      const regex = /https?:\/\/([a-zA-Z0-9.-]+)/;
+      let hostname = uri.match(regex);
+      console.log("hostname", hostname);
+      if (hostname == null) {
+        hostname = uri
+      } else {
+        hostname = hostname[1]
       }
+
+      if (!groupedUris[hostname]) {
+        groupedUris[hostname] = [];
+      }
+      groupedUris[hostname].push([uri, tab.title]);
+      //try {
+      //  let urlObj = new URL(uri);
+      //  let host = urlObj.host;
+
+      //  if (!groupedUris[host]) {
+      //    groupedUris[host] = [];
+      //  }
+      //  groupedUris[host].push([uri, tab.title]);
+      //} catch (error) {
+      //  console.error(`Invalid URL: ${uri}`, error);
+      //}
     }
 
     for (let host in groupedUris) {
@@ -101,13 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
       hostDiv.appendChild(hostHeader);
 
       let ul = document.createElement('ul');
+      allUrlsText += `Host: ${host}\n`;
 
       groupedUris[host].forEach(([uri, title]) => {
         let li = document.createElement('li');
         let a = document.createElement('a');
         a.href = uri;
-
-        if (title == "" || title == "...") {
+        if (title == "..." || title == "") {
           a.textContent = uri;
         } else {
           a.textContent = title;
@@ -116,11 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
         li.appendChild(a);
         ul.appendChild(li);
 
-        allUrlsText += `Host: ${host}\n${uri}\n\n`;
+        allUrlsText += `  - ${uri}\n`;
       });
 
       hostDiv.appendChild(ul);
       hostContainer.appendChild(hostDiv);
+
+      allUrlsText += '\n';
     }
     copyButton.addEventListener('click', () => {
       copyToClipboard(allUrlsText);
@@ -128,24 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-//async function fetchPageTitle(uri) {
-//  try {
-//    const response = await fetch(uri);
-//    const text = await response.text();
-//    const titleMatch = text.match(/<title>(.*?)<\/title>/i);
-//
-//    if (titleMatch && titleMatch.length > 1) {
-//      return titleMatch[1]; // Return the page title
-//    } else {
-//      return null;
-//    }
-//  } catch (error) {
-//    console.error(`Error fetching title for ${uri}:`, error);
-//    return null;
-//  }
-//}
-
-// Function to copy the text to the clipboard
 function copyToClipboard(text) {
   const textarea = document.createElement('textarea');
   textarea.value = text;
