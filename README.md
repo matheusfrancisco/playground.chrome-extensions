@@ -15,3 +15,8 @@ to save in a txt or save in some place.
 4. Enable the developer mode
 5. Click in `Load unpacked`
 6. Select the folder of this repository
+
+## Image 
+
+![image](./img.jpeg)
+![image2](./img2.jpeg)
