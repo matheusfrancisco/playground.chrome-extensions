@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const regex = /https?:\/\/([a-zA-Z0-9.-]+)/;
       let hostname = uri.match(regex);
-      console.log("hostname", hostname);
+
       if (hostname == null) {
         hostname = uri
       } else {
@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
       hostDiv.appendChild(ul);
       hostContainer.appendChild(hostDiv);
 
+      // Add a newline after each host block for formatting
       allUrlsText += '\n';
     }
     copyButton.addEventListener('click', () => {
